@@ -1,0 +1,198 @@
+<html>
+  <head>
+    <title>Iran Test</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v0.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="irangeo.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
+
+    <style>
+      @font-face{
+        font-family:'Yekan';
+        font-weight:normal;
+        font-style:normal;
+        src:url("BYekan.ttf") format("truetype")
+      }
+      body {
+      }
+      .province path {
+          stroke: white;
+          stroke-width: 1px;
+          fill-opacity: .8;
+
+      }
+      #map {
+        margin-left:auto;
+        margin-right:auto;
+      }
+      header {
+        background:#315988;
+        background: url(coloredgimp.png) repeat;
+        color:white;
+        padding:20px;
+        font-family: "Yekan","Helvetica Neue",Helvetica,Arial,sans-serif;
+      }
+      
+      .pageheader {
+        font-family: 'Roboto Condensed', sans-serif;
+        line-height: 50px;
+        font-size: 30px;
+      }
+      .center {
+        float: none;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .bubble {
+        fill-opacity: 0.5
+      }
+
+      path {
+        fill: steelblue;
+        fill-opacity: 0.8;
+      }
+
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: white;
+        shape-rendering: crispEdges;
+      }
+
+      .brush .extent {
+        stroke: #fff;
+        fill-opacity: .125;
+        shape-rendering: crispEdges;
+      }
+          
+      .tick text {
+        fill:white;
+        fill-opacity:0.6;
+      }
+      td {
+        font-size: small;
+      }
+    </style>
+  </head>
+  <body style="background: url(grey.png) repeat;">
+    <header>
+    <div class="row">
+      <div class="span3 pull-right">
+        <img src="icon.png" style="vertical-align:middle;">
+      </div>
+      <div class="span pull-left pageheader">
+        Iran Major Earthquakes
+      </div>
+    </div>
+    </header>
+    <section>
+      <div class="rows">
+        <div class="span4">
+          <table class="table table-striped">
+              <tr>
+                  <th>Region</th>
+                  <td><span class="info" id="region"></span> </td>
+              </tr>
+              <tr>
+                  <th>Date</th>
+                  <td><span class="info" id="date"></span></td>
+              </tr>            <tr>
+              <tr>
+                  <th>Magnitude (>4)</th>
+                  <td><span class="info" id="magnitude"></span></td>
+              </tr>
+                  <th>Lattitude</th>
+                  <td><span class="info" id="lattitude"></span></td>
+              </tr>
+              <tr>
+                  <th>Longitude</th>
+                  <td><span class="info" id="longitude"></span></td>
+              </tr>
+              <tr>
+                  <th>Depth (Km)</th>
+                  <td><span class="info" id="depth"></span></td>
+              </tr>
+          </table>
+          <hr>
+          <div>
+            <p>
+              Iran quakes shows the major earthquakes happened in Iran.
+            </p>
+          </div>
+        </div>
+        <div class="span11" style="padding:20px">
+          <div id="map">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+        var population = {
+          'IR.AR': 193806,
+          'IR.BK': 1938060,
+          'IR.BS': 887115,
+          'IR.CM': 842002,
+          'IR.EA': 3620183,
+          'IR.ES': 4590595,
+          'IR.FA': 4385869,
+          'IR.GI': 2410523,
+          'IR.GO': 1637063,
+          'IR.HD': 1790770,
+          'IR.HG': 1410667,
+          'IR.IL': 545093,
+          'IR.KB': 695099,
+          'IR.KD': 1574118,
+          'IR.KE': 2660927,
+          'IR.KJ': 640218,
+          'IR.KS': 820918,
+          'IR.KV': 5620770,
+          'IR.KZ': 4345607,
+          'IR.LO': 1758628,
+          'IR.MK': 1361394,
+          'IR.MN': 2940831,
+          'IR.QM': 1064456,
+          'IR.QZ': 1166861,
+          'IR.SB': 2410076,
+          'IR.SM': 590512,
+          'IR.TH': 13530742,
+          'IR.WA': 2949426,
+          'IR.YA': 992318,
+          'IR.ZA': 970946   
+      }
+      var date_human = d3.time.format("%d %b %Y-%X");
+      var iran;
+      d3.json("scraped_data.json", function(error, json) {
+        if (error) return console.warn(error);
+        var bubbles = json;
+        var parseDate = d3.time.format("%Y/%m/%d %X").parse;
+        for (var i=0; i < bubbles.length; i++) {
+          var item = bubbles[i] 
+          item.date = parseDate(item.date.split(/\./)[0]);
+        } 
+        iran = IranGeo()
+            .width(800)
+            .height(800)
+            .onmouseover(function(d) {
+            })
+            .bubbles(bubbles)
+            .bubbleOver(function(d) {
+              $('.info').show();
+              $('#region').html(d.region);
+              $('#date').html(date_human(d.date));
+              $('#magnitude').html(d.magnitude);
+              $('#lattitude').html(d.lattitude);
+              $('#longitude').html(d.longitude);
+              $('#depth').html(d.depth);
+            })
+            .bubbleOut(function(d) {
+              $('.info').hide();
+            });
+        var selection = d3.select("#map").datum([]);
+        iran(selection);
+      });
+    </script>
+  </body>
+</html>

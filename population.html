@@ -1,0 +1,209 @@
+<html>
+  <head>
+    <title>D3 Test</title>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v0.min.js"></script>
+    <script src="http://rud.is/passheat/assets/js/jquery.js"></script>
+    <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-carousel.js"></script>
+    
+    <style type="text/css">
+.background {
+  fill: none;
+  /*fill: rgb(239, 237, 245);*/
+  stroke: black;
+  stroke-width: 3.5px;
+  pointer-events: all;
+}
+ 
+#states{
+  fill: rgb(188, 189, 220);
+  stroke: #FFF;
+  opacity: 0.85;
+}
+
+path:hover{
+
+}
+
+#states .active {
+  /*fill: lightblue;*/
+  fill: rgb(117, 107, 177);
+}
+
+text {
+  stroke-width: 0;
+  opacity: 1;
+  fill: black;
+  font-weight:bold;
+}
+
+.maplab {
+}
+    </style>
+  </head>
+<body>
+
+<div>
+  <div>
+    <span id="ostan"></span> popultion: <span id="ostpop"></span>
+  </div>
+
+<div id="map">
+</div>
+</div>
+
+  <script type="text/javascript">
+  var population = {
+'IR.AR': 1257624,
+'IR.BK': 1938060,
+'IR.BS': 887115,
+'IR.CM': 842002,
+'IR.EA': 3620183,
+'IR.ES': 4590595,
+'IR.FA': 4385869,
+'IR.GI': 2410523,
+'IR.GO': 1637063,
+'IR.HD': 1790770,
+'IR.HG': 1410667,
+'IR.IL': 545093,
+'IR.KB': 695099,
+'IR.KD': 1574118,
+'IR.KE': 2660927,
+'IR.KJ': 640218,
+'IR.KS': 820918,
+'IR.KV': 5620770,
+'IR.KZ': 4345607,
+'IR.LO': 1758628,
+'IR.MK': 1361394,
+'IR.MN': 2940831,
+'IR.QM': 1064456,
+'IR.QZ': 1166861,
+'IR.SB': 2410076,
+'IR.SM': 590512,
+'IR.TH': 13530742,
+'IR.WA': 2949426,
+'IR.YA': 992318,
+'IR.ZA': 970946   
+}
+var width = 960,
+    height = 700,
+    centered;
+
+var projection = d3.geo.albers();
+var path = d3.geo.path().projection(projection);
+
+
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var g = svg.append("g")
+    .attr("transform", "translate(0,0)")
+  .append("g")
+    .attr("id", "states");
+
+var subunits;
+
+// coloring
+var minval=0;
+var maxval = 15000000
+var startcolor= 'rgb(222,235,247)';
+var endColor = 'rgb(8,48,107)';
+
+var colorScale = d3.scale.linear()
+         .domain([minval, maxval])
+         .range([startcolor, endColor ]);
+
+// legend as gradient
+var leg = svg.append("g")
+    .attr("transform", "translate(10,400)")
+  .append("g")
+    .attr("id", "legend");
+var gradient = leg.append("svg:defs")
+  .append("svg:linearGradient")
+    .attr("id", "gradient")
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "0%")
+    .attr("y2", "100%")
+    .attr("spreadMethod", "pad");
+
+gradient.append("svg:stop")
+    .attr("offset", "0%")
+    .attr("stop-color", endColor)
+    .attr("stop-opacity", 0.85);
+
+gradient.append("svg:stop")
+    .attr("offset", "100%")
+    .attr("stop-color", startcolor)
+    .attr("stop-opacity", 0.85);
+
+leg.append("rect")
+    .attr("width", 40)
+    .attr("height", 200)
+    // .attr("x", 10)
+    // .attr("y", 50)
+    .attr('fill', "url(#gradient)");
+leg.append("text")
+   .text("15M")
+   .attr('x', 0)
+   .attr('y', -5);
+leg.append("text")
+   .text("0")
+   .attr('x', 15)
+   .attr('y', 215);
+// end of legend
+
+d3.json("iran_topo.json", function(error, iran) {
+    subunits = topojson.object(iran, iran.objects.iran).geometries;
+
+    var projection = d3.geo.mercator()
+    .center([51, 35])
+        .scale(2000)
+        .translate([width / 3, height / 3]);
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+	g.selectAll("path")
+      .data(subunits)
+    .enter().append("path")
+    .attr("d", path)
+    .attr('fill',function(d){
+      return colorScale(population[d.id]);
+    })
+    .on("click", click)
+    .on("mousemove", mousemove);
+
+
+    g.selectAll("text")
+    .data(subunits)
+    .enter()
+    .append("svg:text")
+    .text(function(d){
+        return d.id;
+    })
+    .attr("class", "maplab")
+    .attr("x", function(d){
+        return path.centroid(d)[0];
+    })
+    .attr("y", function(d){
+        return  path.centroid(d)[1];
+    })
+    .attr("text-anchor","middle")
+    .attr('font-size','6pt')
+
+});
+
+function click(d) {
+  
+}
+
+function mousemove(d){
+  $('#ostan').text(d.id);
+  $('#ostpop').text(population[d.id]);s
+}
+  </script>
+
+</body>
+</html>  

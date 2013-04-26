@@ -2,9 +2,11 @@
   <head>
     <title>Iran Test</title>
     <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="tipsy.css" rel="stylesheet">
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://d3js.org/topojson.v0.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="jquery.tipsy.js"></script>
     <script src="irangeo.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
 
@@ -89,7 +91,7 @@
     </header>
     <section>
       <div class="rows">
-        <div class="span4">
+        <div class="span4 hide">
           <table class="table table-striped">
               <tr>
                   <th>Region</th>
@@ -122,7 +124,7 @@
             </p>
           </div>
         </div>
-        <div class="span11" style="padding:20px">
+        <div class="span12 center" style="padding:20px">
           <div id="map">
           </div>
         </div>
@@ -173,8 +175,8 @@
           item.date = parseDate(item.date.split(/\./)[0]);
         } 
         iran = IranGeo()
-            .width(800)
-            .height(800)
+            .width(1000)
+            .height(900)
             .onmouseover(function(d) {
             })
             .bubbles(bubbles)
@@ -192,7 +194,17 @@
             });
         var selection = d3.select("#map").datum([]);
         iran(selection);
+        $('.bubble').tipsy({ 
+          gravity: 'w', 
+          html: true, 
+          title: function() {
+            var d = this.__data__, c = "red";
+            return 'Hi there! My color is <span style="color:' + c + '">' + c + '</span>'; 
+          }
+        });
       });
+
+
     </script>
   </body>
 </html>

@@ -105,7 +105,7 @@ function IranGeo() {
       });
       projection = d3.geo.mercator()
           .center([51, 35])
-          .scale(width * 2.4)
+          .scale(width * 2.2)
           .translate([width / 3 + 50, height / 3 + 40]);
 
       var path = d3.geo.path()

@@ -68,6 +68,7 @@ function IranGeo() {
       zoom = 1600,
       svg, projection,
       brushtext,
+      magnitude,
       clearbrush = function() {
         drawBubbles([]);
         var d = new Date();
@@ -106,7 +107,7 @@ function IranGeo() {
       projection = d3.geo.mercator()
           .center([51, 35])
           .scale(width * 2.2)
-          .translate([width / 3 + 50, height / 3 + 40]);
+          .translate([width / 3 + 50, height / 3 + 50]);
 
       var path = d3.geo.path()
           .projection(projection);
@@ -122,11 +123,13 @@ function IranGeo() {
       .on('mouseover', provinceMouseOver)
       .on('click', provinceClick);
 
+
       var labels = svg.selectAll('.label')
       .data(subunits)
       .enter().append("text")
       .attr("class","label")
       .text(function(d) { return d.id.split(/\./)[1] })
+      .attr('fill','white')
       .attr('x', function(d) { return path.centroid(d)[0] - 10; })
       .attr('y', function(d) { return path.centroid(d)[1]; });
 
@@ -145,9 +148,9 @@ function IranGeo() {
         function brushed() {
           var newdata;
           if (dates.compare(brush.extent()[0],brush.extent()[1]) == 0) {
-            var d = d3.time.month.offset(brush.extent()[0], 6);
-            var d2 = d3.time.month.offset(brush.extent()[0], 0);
-            brush.extent([d2, d]);
+            var d = d3.time.month.offset(brush.extent()[0], -6);
+            var d2 = d3.time.month.offset(brush.extent()[0], 6 );
+            brush.extent([d, d2]);
             svg.select(".brush").call(brush);
           }
           var extent = brush.extent();
@@ -218,19 +221,19 @@ function IranGeo() {
   
   function drawBubbles(values){
     var circle = svg.selectAll(".bubble").data(values, function(d) { return d.date.getTime() });
-    var delay = first ? 1000: 0;
+    var delay = 0;
     if (first) first = false;
     circle.enter().append("circle")
       .attr("class", "bubble")
       .attr("cx", function(d) { return projection([parseFloat(d.longitude), parseFloat(d.lattitude)])[0];})
       .attr("cy", function(d) { return projection([parseFloat(d.longitude), parseFloat(d.lattitude)])[1];})
-      .attr("fill", function(d) { return zScale(parseFloat(d.depth))})
+      .attr("fill", function(d) { return "red" })
       .attr("r", 0)
       .on("mouseover", bubbleOver)
       .on("mouseout", bubbleOut)
       .transition().delay(delay)
       .attr("r", function(d) { return magnitude(parseFloat(d.magnitude))/10050 });
-      
+     
     circle.exit()
           .transition()
           .attr("r",0)
@@ -288,8 +291,16 @@ function IranGeo() {
     return iran;
   }
 
+  iran.magnitude = function(_) {
+    return magnitude(_);
+  }
+
   iran.clearbrush = function() {
     clearbrush();
+  }
+
+  iran.projection = function() {
+    return projection;
   }
 return iran;
 }

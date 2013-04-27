@@ -6,7 +6,7 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://d3js.org/topojson.v0.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-    <script src="jquery.tipsy.js"></script>
+    <script src="bootstrap-tooltip.js"></script>
     <script src="irangeo.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
 
@@ -28,6 +28,7 @@
       #map {
         margin-left:auto;
         margin-right:auto;
+        position: relative;
       }
       header {
         background:#315988;
@@ -48,14 +49,30 @@
         margin-right: auto;
       }
       .bubble {
-        fill-opacity: 0.5
+        fill-opacity: 0.5;
+        -o-transition:.5s;
+        -ms-transition:.5s;
+        -moz-transition:.5s;
+        -webkit-transition:.5s;
+        /* ...and now for the proper property */
+        transition:.5s;
+      }
+
+      .bubble:hover{
+        fill:black;
+        fill-opacity:0.5;
       }
 
       path {
         fill: steelblue;
         fill-opacity: 0.8;
       }
-
+      .tip {
+        position: absolute;
+        background-color: #000; color: #FFF; max-width: 200px; padding: 5px 8px 4px 8px; text-align: center;
+        font-size: 10px; position: absolute; padding: 5px; z-index: 100000;
+        opacity: 0.7;
+      }
       .axis path,
       .axis line {
         fill: none;
@@ -76,6 +93,13 @@
       td {
         font-size: small;
       }
+      .th {
+        font-weight: bold;
+        font-size: 16px;
+      }
+      .info {
+        padding: 5px;
+      }
     </style>
   </head>
   <body style="background: url(grey.png) repeat;">
@@ -86,37 +110,13 @@
       </div>
       <div class="span pull-left pageheader">
         Iran Major Earthquakes
+
       </div>
     </div>
     </header>
     <section>
       <div class="rows">
         <div class="span4 hide">
-          <table class="table table-striped">
-              <tr>
-                  <th>Region</th>
-                  <td><span class="info" id="region"></span> </td>
-              </tr>
-              <tr>
-                  <th>Date</th>
-                  <td><span class="info" id="date"></span></td>
-              </tr>            <tr>
-              <tr>
-                  <th>Magnitude (>4)</th>
-                  <td><span class="info" id="magnitude"></span></td>
-              </tr>
-                  <th>Lattitude</th>
-                  <td><span class="info" id="lattitude"></span></td>
-              </tr>
-              <tr>
-                  <th>Longitude</th>
-                  <td><span class="info" id="longitude"></span></td>
-              </tr>
-              <tr>
-                  <th>Depth (Km)</th>
-                  <td><span class="info" id="depth"></span></td>
-              </tr>
-          </table>
           <hr>
           <div>
             <p>
@@ -126,6 +126,38 @@
         </div>
         <div class="span12 center" style="padding:20px">
           <div id="map">
+            <div class="tip hide">
+              <table style="color:white;">
+                  <tr>
+                      <td><span class="th">Region</span></td>
+                      <td><span class="info" id="region"></span> </td>
+                  </tr>
+                  <tr>
+                      <td><span class="th">Date</span></td>
+                      <td><span class="info" id="date"></span></td>
+                  </tr>            <tr>
+                  <tr>
+                      <td><span class="th">Time</span></td>
+                      <td><span class="info" id="time"></span></td>
+                  </tr>            <tr>
+                  <tr>
+                      <td><span class="th">Magnitude</span></td>
+                      <td><span class="info" id="magnitude"></span></td>
+                  </tr>
+                      <td><span class="th">Lattitude</span></td>
+                      <td><span class="info" id="lattitude"></span></td>
+                  </tr>
+                  <tr>
+                      <td><span class="th">Longitude</span></td>
+                      <td><span class="info" id="longitude"></span></td>
+                  </tr>
+                  <tr>
+                      <td><span class="th">Depth (Km)</span></td>
+                      <td><span class="info" id="depth"></span></td>
+                  </tr>
+              </table>
+
+            </div>
           </div>
         </div>
       </div>
@@ -164,16 +196,22 @@
           'IR.YA': 992318,
           'IR.ZA': 970946   
       }
-      var date_human = d3.time.format("%d %b %Y-%X");
+      var date_human = d3.time.format("%d %b %Y");
+      var time_human = d3.time.format("%X");
       var iran;
       d3.json("scraped_data.json", function(error, json) {
         if (error) return console.warn(error);
-        var bubbles = json;
+        console.log(json);
+        json.sort(function(b, a) {
+          return parseFloat(a.magnitude) - parseFloat(b.magnitude);
+        });
+        bubbles = json;
+        console.log(json);
         var parseDate = d3.time.format("%Y/%m/%d %X").parse;
         for (var i=0; i < bubbles.length; i++) {
-          var item = bubbles[i] 
+          var item = bubbles[i];
           item.date = parseDate(item.date.split(/\./)[0]);
-        } 
+        }
         iran = IranGeo()
             .width(1000)
             .height(900)
@@ -181,30 +219,39 @@
             })
             .bubbles(bubbles)
             .bubbleOver(function(d) {
-              $('.info').show();
+              var projection = iran.projection();
+              var r = iran.magnitude(parseFloat(d.magnitude))/10050;
+
               $('#region').html(d.region);
               $('#date').html(date_human(d.date));
+              $('#time').html(time_human(d.date));
               $('#magnitude').html(d.magnitude);
               $('#lattitude').html(d.lattitude);
               $('#longitude').html(d.longitude);
               $('#depth').html(d.depth);
+              var vals = projection([parseFloat(d.longitude), parseFloat(d.lattitude)]);
+              console.log(r);
+              d3.select('.tip')
+                .style('left', vals[0] + r + 5)
+                .style('top', vals[1])
+                .style('display', 'block');
             })
             .bubbleOut(function(d) {
-              $('.info').hide();
+              d3.select('.tip')
+                .style('display', 'none');
             });
         var selection = d3.select("#map").datum([]);
         iran(selection);
-        $('.bubble').tipsy({ 
-          gravity: 'w', 
-          html: true, 
-          title: function() {
-            var d = this.__data__, c = "red";
-            return 'Hi there! My color is <span style="color:' + c + '">' + c + '</span>'; 
-          }
-        });
       });
 
-
     </script>
+    <div id="footer">
+      <div class="container">
+        <p class="muted credit">Created by <a target="_blank" href="https://github.com/nasir5959/">Nasir Shadravan</a> and <a target="_blank" href="https://github.com/uunbound/">Peyman Shojaei</a>.
+          <span class="pull-right">The data is extracted from <a target="_blank" href="http://irsc.ut.ac.ir/index.php?lang=ea">Iranian Seismological Center</a></span>
+        </p>
+
+      </div>
+    </div>
   </body>
 </html>

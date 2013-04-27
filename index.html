@@ -1,22 +1,16 @@
 <html>
   <head>
-    <title>Iran Test</title>
+    <title>Iran Major Earthquakes</title>
+    <meta name="description" content="Major earthquakes happend in Iran since 2006. زلزله‌ های بزرگ ایران.">
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <link href="bootstrap.min.css" rel="stylesheet">
-    <link href="tipsy.css" rel="stylesheet">
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://d3js.org/topojson.v0.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-    <script src="bootstrap-tooltip.js"></script>
     <script src="irangeo.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
 
     <style>
-      @font-face{
-        font-family:'Yekan';
-        font-weight:normal;
-        font-style:normal;
-        src:url("BYekan.ttf") format("truetype")
-      }
       body {
       }
       .province path {
@@ -49,7 +43,8 @@
         margin-right: auto;
       }
       .bubble {
-        fill-opacity: 0.5;
+        fill: #CC333F;
+        fill-opacity: 0.6;
         -o-transition:.5s;
         -ms-transition:.5s;
         -moz-transition:.5s;
@@ -59,8 +54,8 @@
       }
 
       .bubble:hover{
-        fill:black;
-        fill-opacity:0.5;
+        fill:#00477F;
+        fill-opacity:0.8;
       }
 
       path {
@@ -101,6 +96,20 @@
         padding: 5px;
       }
     </style>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-38791134-2']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
   </head>
   <body style="background: url(grey.png) repeat;">
     <header>
@@ -128,7 +137,7 @@
           <div id="map">
             <div class="tip hide">
               <table style="color:white;">
-                  <tr>
+                  <tr class="hide">
                       <td><span class="th">Region</span></td>
                       <td><span class="info" id="region"></span> </td>
                   </tr>
@@ -164,38 +173,6 @@
     </section>
 
     <script>
-        var population = {
-          'IR.AR': 193806,
-          'IR.BK': 1938060,
-          'IR.BS': 887115,
-          'IR.CM': 842002,
-          'IR.EA': 3620183,
-          'IR.ES': 4590595,
-          'IR.FA': 4385869,
-          'IR.GI': 2410523,
-          'IR.GO': 1637063,
-          'IR.HD': 1790770,
-          'IR.HG': 1410667,
-          'IR.IL': 545093,
-          'IR.KB': 695099,
-          'IR.KD': 1574118,
-          'IR.KE': 2660927,
-          'IR.KJ': 640218,
-          'IR.KS': 820918,
-          'IR.KV': 5620770,
-          'IR.KZ': 4345607,
-          'IR.LO': 1758628,
-          'IR.MK': 1361394,
-          'IR.MN': 2940831,
-          'IR.QM': 1064456,
-          'IR.QZ': 1166861,
-          'IR.SB': 2410076,
-          'IR.SM': 590512,
-          'IR.TH': 13530742,
-          'IR.WA': 2949426,
-          'IR.YA': 992318,
-          'IR.ZA': 970946   
-      }
       var date_human = d3.time.format("%d %b %Y");
       var time_human = d3.time.format("%X");
       var iran;

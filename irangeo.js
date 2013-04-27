@@ -227,7 +227,6 @@ function IranGeo() {
       .attr("class", "bubble")
       .attr("cx", function(d) { return projection([parseFloat(d.longitude), parseFloat(d.lattitude)])[0];})
       .attr("cy", function(d) { return projection([parseFloat(d.longitude), parseFloat(d.lattitude)])[1];})
-      .attr("fill", function(d) { return "red" })
       .attr("r", 0)
       .on("mouseover", bubbleOver)
       .on("mouseout", bubbleOut)

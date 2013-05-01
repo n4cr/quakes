@@ -147,6 +147,7 @@ function IranGeo() {
         monthname = d3.time.format("%b");
         function brushed() {
           var newdata;
+          console.log(brush.extent());
           if (dates.compare(brush.extent()[0],brush.extent()[1]) == 0) {
             var d = d3.time.month.offset(brush.extent()[0], -6);
             var d2 = d3.time.month.offset(brush.extent()[0], 6 );

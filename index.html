@@ -173,53 +173,72 @@
     </section>
 
     <script>
-      var date_human = d3.time.format("%d %b %Y");
-      var time_human = d3.time.format("%X");
-      var iran;
-      d3.json("scraped_data.json", function(error, json) {
-        if (error) return console.warn(error);
-        console.log(json);
-        json.sort(function(b, a) {
-          return parseFloat(a.magnitude) - parseFloat(b.magnitude);
-        });
-        bubbles = json;
-        console.log(json);
-        var parseDate = d3.time.format("%Y/%m/%d %X").parse;
-        for (var i=0; i < bubbles.length; i++) {
-          var item = bubbles[i];
-          item.date = parseDate(item.date.split(/\./)[0]);
-        }
-        iran = IranGeo()
-            .width(1000)
-            .height(900)
-            .onmouseover(function(d) {
-            })
-            .bubbles(bubbles)
-            .bubbleOver(function(d) {
-              var projection = iran.projection();
-              var r = iran.magnitude(parseFloat(d.magnitude))/10050;
 
-              $('#region').html(d.region);
-              $('#date').html(date_human(d.date));
-              $('#time').html(time_human(d.date));
-              $('#magnitude').html(d.magnitude);
-              $('#lattitude').html(d.lattitude);
-              $('#longitude').html(d.longitude);
-              $('#depth').html(d.depth);
-              var vals = projection([parseFloat(d.longitude), parseFloat(d.lattitude)]);
-              console.log(r);
-              d3.select('.tip')
-                .style('left', vals[0] + r + 5)
-                .style('top', vals[1])
-                .style('display', 'block');
-            })
-            .bubbleOut(function(d) {
-              d3.select('.tip')
-                .style('display', 'none');
-            });
-        var selection = d3.select("#map").datum([]);
-        iran(selection);
-      });
+    var bubbles;
+    $.ajax({
+         url:"http://comcat.cr.usgs.gov/earthquakes/feed/search.php?maxEventLahttp://comcat.cr.usgs.gov/earthquakes/feed/search.php?maxEventLatitude=40&minEventLatitude=25&minEventLongitude=43&maxEventLongitude=64&minEventTime=956275200000&maxEventTime=1367280000000&minEventMagnitude=5&maxEventMagnitude=10&minEventDepth=0.0&maxEventDepth=800.0&format=geojson",
+         dataType: 'jsonp', // Notice! JSONP <-- P (lowercase)
+         success:function(data){
+             // do stuff with json (in this case an array)
+             console.log(data);
+             var json = data.features;
+
+            var date_human = d3.time.format("%d %b %Y");
+            var time_human = d3.time.format("%X");
+            var iran;
+//            d3.json("scraped_data.json", function(error, json) {
+//              if (error) return console.warn(error);
+
+              json.sort(function(b, a) {
+                return parseFloat(a.magnitude) - parseFloat(b.magnitude);
+              });
+              bubbles = json;
+              var parseDate = d3.time.format("%Y/%m/%d %X").parse;
+              for (var i=0; i < bubbles.length; i++) {
+                var item = bubbles[i];
+                console.log(item);
+                item.date = new Date(parseInt(item.properties.time));
+                item.lattitude = item.geometry.coordinates[0];
+                item.longitude = item.geometry.coordinates[1];
+                item.magnitude = item.properties.mag;
+              }
+              iran = IranGeo()
+                  .width(1000)
+                  .height(900)
+                  .onmouseover(function(d) {
+                  })
+                  .bubbles(bubbles)
+                  .bubbleOver(function(d) {
+                    var projection = iran.projection();
+                    var r = iran.magnitude(d.properties.mag)/10050;
+
+                    $('#region').html(d.properties.place);
+                    $('#date').html(date_human(d.date));
+                    $('#time').html(time_human(d.date));
+                    $('#magnitude').html(d.properties.mag);
+                    $('#lattitude').html(d.lattitude);
+                    $('#longitude').html(d.longitude);
+                    $('#depth').html(d.properties.gap);
+                    var vals = projection([d.longitude, d.lattitude]);
+
+                    d3.select('.tip')
+                      .style('left', vals[0] + r + 5)
+                      .style('top', vals[1])
+                      .style('display', 'block');
+                  })
+                  .bubbleOut(function(d) {
+                    d3.select('.tip')
+                      .style('display', 'none');
+                  });
+              var selection = d3.select("#map").datum([]);
+              iran(selection);
+    //        });
+         },
+         error:function(){
+             alert("Error getting data. try again later.");
+         },
+    });
+
 
     </script>
     <div id="footer">

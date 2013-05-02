@@ -106,8 +106,8 @@ function IranGeo() {
       });
       projection = d3.geo.mercator()
           .center([51, 35])
-          .scale(width * 2.2)
-          .translate([width / 3 + 50, height / 3 + 50]);
+          .scale(width * 2)
+          .translate([width / 3 + 50, height / 3 + 70]);
 
       var path = d3.geo.path()
           .projection(projection);
@@ -139,11 +139,14 @@ function IranGeo() {
               .range(['red','blue']);
         //drawBubbles(bubbles);
     // Brush stuff. should not bundle with other stuff
-
-        xScale = d3.time.scale.utc()
+        xextent = d3.extent(bubbles.map(function(d) { return d.date; }));
+        xScale = d3.time.scale()
           .domain(d3.extent(bubbles.map(function(d) { return d.date; })))
           .range([0, width]);
 
+        yScale = d3.scale.linear()
+          .domain(d3.extent(bubbles.map(function(d) { return d.magnitude; })))
+          .range([0, 40]);
         monthname = d3.time.format("%b");
         function brushed() {
           var newdata;
@@ -174,9 +177,9 @@ function IranGeo() {
         
         var area = d3.svg.area()
            .interpolate("monotone")
-           .x(function(d) { return xScale(d.date); })
+           .x(function(d) {console.log(xScale(d.date)); return xScale(d.date); })
            .y0(0)
-           .y1(function(d) { return spanH; });
+           .y1(function(d) {return yScale(d.magnitude)});
 
         brushmin = svg.append("text")
                           .style('display', 'none')
@@ -193,11 +196,19 @@ function IranGeo() {
         
         var timespan = svg.append("g")
             .attr("transform", "translate(" + 0  + "," + 10 + ")");
-
+/*
         timespan.append("path")
                 .datum(bubbles)
                 .attr("class", "timespan")
                 .attr("d", area)
+                */
+        timespan.append("rect")
+                .attr("class", "timespan")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", xScale(xextent[1]))
+                .attr("height", 40);
+
         var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
         timespan.append("g").attr("class", "x axis")
                 .attr("transform", "translate(0,0)").call(xAxis);
@@ -225,13 +236,13 @@ function IranGeo() {
     if (first) first = false;
     circle.enter().append("circle")
       .attr("class", "bubble")
-      .attr("cx", function(d) { return projection([parseFloat(d.longitude), parseFloat(d.lattitude)])[0];})
-      .attr("cy", function(d) { return projection([parseFloat(d.longitude), parseFloat(d.lattitude)])[1];})
+      .attr("cx", function(d) { return projection([d.longitude, d.lattitude])[0];})
+      .attr("cy", function(d) { return projection([d.longitude, d.lattitude])[1];})
       .attr("r", 0)
       .on("mouseover", bubbleOver)
       .on("mouseout", bubbleOut)
       .transition().delay(delay)
-      .attr("r", function(d) { return magnitude(parseFloat(d.magnitude))/10050 });
+      .attr("r", function(d) { return magnitude(d.magnitude)/10050 });
      
     circle.exit()
           .transition()
@@ -300,6 +311,9 @@ function IranGeo() {
 
   iran.projection = function() {
     return projection;
+  }
+  iran.svg = function() {
+    return svg;
   }
 return iran;
 }

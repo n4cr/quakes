@@ -4,11 +4,8 @@
     <meta name="description" content="Major earthquakes happend in Iran since 2006. زلزله‌ های بزرگ ایران.">
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <link href="bootstrap.min.css" rel="stylesheet">
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="http://d3js.org/topojson.v0.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-    <script src="irangeo.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 
     <style>
       body {
@@ -31,7 +28,9 @@
         padding:20px;
         font-family: "Yekan","Helvetica Neue",Helvetica,Arial,sans-serif;
       }
-      
+      .font {
+        font-family: 'Roboto Condensed', sans-serif;
+      }
       .pageheader {
         font-family: 'Roboto Condensed', sans-serif;
         line-height: 50px;
@@ -45,6 +44,8 @@
       .bubble {
         fill: #CC333F;
         fill-opacity: 0.6;
+        stroke: white;
+        stroke-width:0.3px;
         -o-transition:.5s;
         -ms-transition:.5s;
         -moz-transition:.5s;
@@ -80,7 +81,13 @@
         fill-opacity: .125;
         shape-rendering: crispEdges;
       }
-          
+      
+      .timespan {
+        fill:steelblue;
+        fill-opacity:0.7;
+        stroke: black;
+        stroke-width:0.5px;
+      }   
       .tick text {
         fill:white;
         fill-opacity:0.6;
@@ -134,10 +141,16 @@
           </div>
         </div>
         <div class="span12 center" style="padding:20px">
-          <div id="map">
+          <div id="loading" style="margin:50px; text-align:center" class="center">
+            <h2>Please wait...</h2>
+          </div>
+          <div id="map" class="hide">
+            <div class="font" style="text-align: center">
+              Drag/click a time range below
+            </div>
             <div class="tip hide">
               <table style="color:white;">
-                  <tr class="hide">
+                  <tr>
                       <td><span class="th">Region</span></td>
                       <td><span class="info" id="region"></span> </td>
                   </tr>
@@ -175,36 +188,34 @@
     <script>
 
     var bubbles;
-    $.ajax({
-         url:"http://comcat.cr.usgs.gov/earthquakes/feed/search.php?maxEventLahttp://comcat.cr.usgs.gov/earthquakes/feed/search.php?maxEventLatitude=40&minEventLatitude=25&minEventLongitude=43&maxEventLongitude=64&minEventTime=956275200000&maxEventTime=1367280000000&minEventMagnitude=5&maxEventMagnitude=10&minEventDepth=0.0&maxEventDepth=800.0&format=geojson",
-         dataType: 'jsonp', // Notice! JSONP <-- P (lowercase)
-         success:function(data){
-             // do stuff with json (in this case an array)
-             console.log(data);
-             var json = data.features;
-
+    var iran;
+      $(document).ready(function() {
             var date_human = d3.time.format("%d %b %Y");
             var time_human = d3.time.format("%X");
-            var iran;
-//            d3.json("scraped_data.json", function(error, json) {
-//              if (error) return console.warn(error);
+           d3.json("data.json", function(error, data) {
+             if (error) return console.warn(error);
+
+             var json = data.features;
 
               json.sort(function(b, a) {
                 return parseFloat(a.magnitude) - parseFloat(b.magnitude);
               });
-              bubbles = json;
+              console.log(json);
+              bubbles = json.filter(function(e,i , arr) {
+                return e.geometry.coordinates[1] < 40;
+              });
+              console.log(bubbles);
               var parseDate = d3.time.format("%Y/%m/%d %X").parse;
               for (var i=0; i < bubbles.length; i++) {
                 var item = bubbles[i];
-                console.log(item);
                 item.date = new Date(parseInt(item.properties.time));
-                item.lattitude = item.geometry.coordinates[0];
-                item.longitude = item.geometry.coordinates[1];
+                item.longitude = item.geometry.coordinates[0];
+                item.lattitude = item.geometry.coordinates[1];
                 item.magnitude = item.properties.mag;
               }
               iran = IranGeo()
                   .width(1000)
-                  .height(900)
+                  .height(800)
                   .onmouseover(function(d) {
                   })
                   .bubbles(bubbles)
@@ -220,10 +231,10 @@
                     $('#longitude').html(d.longitude);
                     $('#depth').html(d.properties.gap);
                     var vals = projection([d.longitude, d.lattitude]);
-
+                    console.log();
                     d3.select('.tip')
-                      .style('left', vals[0] + r + 5)
-                      .style('top', vals[1])
+                      .style('left', d3.mouse(this)[0] + 15 ) //vals[0] - r - 5)
+                      .style('top', d3.mouse(this)[1] + 15) //vals[1])
                       .style('display', 'block');
                   })
                   .bubbleOut(function(d) {
@@ -232,22 +243,26 @@
                   });
               var selection = d3.select("#map").datum([]);
               iran(selection);
-    //        });
-         },
-         error:function(){
-             alert("Error getting data. try again later.");
-         },
-    });
+              $('#loading').fadeOut('slow', function() {
+                $('#map').fadeIn('slow', function() {
+                  $('#loading').remove();
+                });
+              });
+           });
 
+      });
 
     </script>
     <div id="footer">
       <div class="container">
         <p class="muted credit">Created by <a target="_blank" href="https://github.com/nasir5959/">Nasir Shadravan</a> and <a target="_blank" href="https://github.com/uunbound/">Peyman Shojaei</a>.
-          <span class="pull-right">The data is extracted from <a target="_blank" href="http://irsc.ut.ac.ir/index.php?lang=ea">Iranian Seismological Center</a></span>
+          <span class="pull-right">The data is extracted from <a target="_blank" href="http://earthquake.usgs.gov/">United States Geological Survey</a></span>
         </p>
 
       </div>
     </div>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v0.min.js"></script>
+    <script src="irangeo.js"></script>
   </body>
 </html>

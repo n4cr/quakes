@@ -150,9 +150,10 @@
     <a href="https://twitter.com/share" class="twitter-share-button" data-via="n4Cr">Tweet</a>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
               </span>
+
             </div>
             <div class="font" style="text-align: center">
-              Drag/click a time range below
+              Drag/click a time range below.
             </div>
             <div class="tip hide">
               <table style="color:white;">
@@ -203,9 +204,6 @@
 
              var json = data.features;
 
-              json.sort(function(b, a) {
-                return parseFloat(a.magnitude) - parseFloat(b.magnitude);
-              });
               console.log(json);
               bubbles = json.filter(function(e,i , arr) {
                 return e.geometry.coordinates[1] < 40;

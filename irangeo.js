@@ -160,6 +160,9 @@ function IranGeo() {
           newdata = bubbles.filter(function(item, i, arr) {
             return dates.inRange(item.date, extent[0], extent[1]); 
           }); 
+          newdata.sort(function(b, a) {
+            return a.magnitude - b.magnitude;
+          });
           var xpos = xScale(extent[0]) + (xScale(extent[1]) - xScale(extent[0])) / 2 - 5;
           brushtext.text(newdata.length).attr('x', xpos) 
                       .style('display','block');

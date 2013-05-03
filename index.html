@@ -119,10 +119,18 @@
 
   </head>
   <body style="background: url(grey.png) repeat;">
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
     <header>
     <div class="row">
       <div class="span3 pull-right">
-        <img src="icon.png" style="vertical-align:middle;">
+        <img src="icon.png" style="vertical-align:middle;" class="pull-right">
       </div>
       <div class="span pull-left pageheader">
         Iran Major Earthquakes
@@ -147,12 +155,13 @@
           <div id="map" class="hide">
             <div>
               <span>
-    <a href="https://twitter.com/share" class="twitter-share-button" data-via="n4Cr">Tweet</a>
-    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-via="slashnsr">Tweet</a>
+                <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
               </span>
+              <span class="fb-like" data-href="http://iranquakes.com" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"></span>
             </div>
             <div class="font" style="text-align: center">
-              Drag/click a time range below
+              Drag/click a time range below.
             </div>
             <div class="tip hide">
               <table style="color:white;">
@@ -203,14 +212,9 @@
 
              var json = data.features;
 
-              json.sort(function(b, a) {
-                return parseFloat(a.magnitude) - parseFloat(b.magnitude);
-              });
-              console.log(json);
               bubbles = json.filter(function(e,i , arr) {
                 return e.geometry.coordinates[1] < 40;
               });
-              console.log(bubbles);
               var parseDate = d3.time.format("%Y/%m/%d %X").parse;
               for (var i=0; i < bubbles.length; i++) {
                 var item = bubbles[i];
